@@ -9,7 +9,6 @@
 #include <math.h>
 
 #define PI 3.14159
-
 class MatrixStack
 {
   public:
@@ -117,10 +116,9 @@ class PushStack
   MatrixStack &m_stack;
   
   PushStack(const PushStack &);
-}; 
+};
 
-
-internal void printMatrix(const glm::mat4 &matrix)
+void printMatrix(const glm::mat4 &matrix)
 {
   char *s = R"FOO( 
   %.3f, %.3f, %.3f, %.3f,
@@ -136,5 +134,28 @@ internal void printMatrix(const glm::mat4 &matrix)
          mat[1], mat[5], mat[9], mat[13], 
          mat[2], mat[6], mat[10],mat[14], 
          mat[3], mat[7], mat[11],mat[15]); 
+}
+
+void printMatrix(const glm::mat3 &matrix)
+{
+  char *s = R"FOO( 
+  %.8f, %.8f, %.8f,
+  %.8f, %.8f, %.8f,
+  %.8f, %.8f, %.8f
+  )FOO";
+  
+  const float *mat = glm::value_ptr(matrix);
+  
+  printf(s,
+         mat[0], mat[3], mat[6],
+         mat[1], mat[4], mat[7],
+         mat[2], mat[5], mat[8]);
+}
+
+void printVector(const glm::vec3 &vec)
+{
+  char *s = "<%.3f, %.3f, %.3f>\n";
+  
+  printf(s, vec.x, vec.y, vec.z);
 }
 #endif
