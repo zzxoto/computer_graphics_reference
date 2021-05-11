@@ -17,26 +17,20 @@ typedef unsigned char uchar;
 
 typedef struct FontMetrics
 {
-  int ascent;   //max distance from the baseline to top of bbox, across all the glyphs of the font. +ve.
-  int descent;  //max distance from the baseline to bottom of bbox, across all the glyphs of the font. -ve.
-  int lineHeight;//Line Height. This value little more than ascent - descent. +ve. When breaking a new line, do baeline += lineHeight;
+  int ascent;   
+  int descent;  
+  int lineHeight;
 } FontMetrics;
 
 typedef struct CharacterFontInfo
 {
-  //bbox is the smallest box i.e. the box with the least area 
-  //that bounds the glyph.
-  
-  //If the font were being drawn on the paper, the penPosition would be the 
-  //horizontal position of the pen on standby about to draw.
-  
   uchar character;
-  int advanceWidth; //move penPosition by this distance, to draw next character. +ve
-  int topBearing;   //distance from baseline to top of bbox. +ve
-  int leftBearing;  //distance from origin to left of bbox.  +ve
+  int advanceWidth; 
+  int topBearing;   
+  int leftBearing;  
   GLuint textureId; //OpenGL texture Id from `glGenTextures` call.
-  int w;            //width of the texture/bbox/glyph. +ve
-  int h;            //height of the texture/bbox/glyph. +ve
+  int w;            //width of the texture/bbox/glyph.
+  int h;            //height of the texture/bbox/glyph.
 } CharacterInfo;
 
 typedef struct Font
@@ -44,8 +38,8 @@ typedef struct Font
   FontMetrics *fontMetrics;
   stbtt_fontinfo *stbFont;
   int fontHeightPx;
-  int characterFontInfoCount;
-  CharacterFontInfo *characterFontInfo;
+  CharacterFontInfo *characterFontInfo;//tightly packed array
+  int characterFontInfoCount;          //no. of elements in array above
 } Font;
 Font *g_font;
 
@@ -72,7 +66,7 @@ static glm::mat4 g_modelMatrix(1);
 static float g_zRotation  = 0;
 static bool g_shouldSpin = true;
 
-uchar characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567891 !@#$%^&*()-_+=.";
+uchar g_characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567891 !@#$%^&*()-_+=.";
 
 uchar ttfBuffer[1 << 22];
 
@@ -97,7 +91,7 @@ Font *initFont(char *ttfFilename, int fontHeightPx)
     //3. scale factor given the desired font height in pixel
     float scale = stbtt_ScaleForPixelHeight(stbtt_font, fontHeightPx);
     
-    int charactersN = sizeof(characters);
+    int charactersN = sizeof(g_characters);
     
     CharacterFontInfo *characterFontInfo = (CharacterFontInfo *) malloc(charactersN * sizeof(CharacterFontInfo));
     
@@ -110,7 +104,7 @@ Font *initFont(char *ttfFilename, int fontHeightPx)
     for (int i = 0; i < charactersN; i++)
     {
       //4. character font bitmap and metrics
-      uchar c = characters[i];
+      uchar c = g_characters[i];
       CharacterFontInfo *cFontInfo = characterFontInfo + i;
       
       {
@@ -162,7 +156,7 @@ Font *initFont(char *ttfFilename, int fontHeightPx)
     FontMetrics *fontMetrics = (FontMetrics *) malloc(sizeof(FontMetrics));
     stbtt_GetFontVMetrics(stbtt_font, &ascent, &descent, &lineGap);
     fontMetrics->ascent = (int) ascent * scale;
-    fontMetrics->descent = (int) descent * scale;
+    fontMetrics->descent = (int) -descent * scale;//descent is -ve in stb  font metrics
     fontMetrics->lineHeight = (int) (ascent - descent + lineGap) * scale;
     
     //6. pack and return pointer;
@@ -351,7 +345,6 @@ void displayText(Font *font, const char *text, int left, int top)
 }
 
 
-//assumes program is bound
 void layoutText(Font *font, const char *text, int left, int top, int *right, int *bottom)
 {
   char c = *text;
