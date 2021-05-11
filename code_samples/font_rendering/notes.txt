@@ -1,0 +1,70 @@
+STBTT_DEF void stbtt_GetCodepointHMetrics(
+    const stbtt_fontinfo *info, 
+    int codepoint, int *advanceWidth, 
+    int *leftSideBearing);
+// leftSideBearing is the offset from the current horizontal position to the left edge of the character
+// advanceWidth is the offset from the current horizontal position to the next horizontal position
+// these are expressed in unscaled coordinates 
+
+  
+STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info, int *ascent, int *descent, int *lineGap);
+  // ascent is the coordinate above the baseline the font extends; descent
+  // is the coordinate below the baseline the font extends (i.e. it is typically negative)
+  // lineGap is the spacing between one row's descent and the next row's ascent...
+  // so you should advance the vertical position by "*ascent - *descent + *lineGap"
+  //   these are expressed in unscaled coordinates, so you must multiply by
+  //   the scale factor for a given size
+
+STBTT_DEF float stbtt_ScaleForPixelHeight(const stbtt_fontinfo *info, float pixels);
+  // computes a scale factor to produce a font whose "height" is 'pixels' tall.
+  // Height is measured as the distance from the highest ascender to the lowest
+  // descender; in other words, it's equivalent to calling stbtt_GetFontVMetrics
+  // and computing:
+  //       scale = pixels / (ascent - descent)
+  // so if you prefer to measure height by the ascent only, use a similar calculation.
+
+
+STBTT_DEF unsigned char *stbtt_GetCodepointBitmap(const stbtt_fontinfo *info, float scale_x, float scale_y, int codepoint, int *width, int *height, int *xoff, int *yoff);
+  // allocates a large-enough single-channel 8bpp bitmap and renders the
+  // specified character/glyph at the specified scale into it, with
+  // antialiasing. 0 is no coverage (transparent), 255 is fully covered (opaque).
+  // *width & *height are filled out with the width & height of the bitmap,
+  // which is stored left-to-right, top-to-bottom.
+  //
+  // xoff/yoff are the offset it pixel space from the glyph origin to the top-left of the bitmap
+
+
+STBTT_DEF int stbtt_GetFontOffsetForIndex(const unsigned char *data, int index);
+  // Each .ttf/.ttc file may have more than one font. Each font has a sequential
+  // index number starting from 0. Call this function to get the font offset for
+  // a given index; it returns -1 if the index is out of range. A regular .ttf
+  // file will only define one font and it always be at offset 0, so it will
+  // return '0' for index 0, and -1 for all other indices.
+  
+#if 0
+#include <stdio.h>
+#define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
+#include "stb_truetype.h"
+
+char ttf_buffer[1<<25];
+
+int main(int argc, char **argv)
+{
+  stbtt_fontinfo font;
+  unsigned char *bitmap;
+  int w,h,i,j,c = (argc > 1 ? atoi(argv[1]) : 'a'), s = (argc > 2 ? atoi(argv[2]) : 20);
+  
+  fread(ttf_buffer, 1, 1<<25, fopen(argc > 3 ? argv[3] : "c:/windows/fonts/arialbd.ttf", "rb"));
+  
+  stbtt_InitFont(&font, ttf_buffer, stbtt_GetFontOffsetForIndex(ttf_buffer,0));
+  bitmap = stbtt_GetCodepointBitmap(&font, 0,stbtt_ScaleForPixelHeight(&font, s), c, &w, &h, 0,0);
+  
+  for (j=0; j < h; ++j) {
+    for (i=0; i < w; ++i)
+      putchar(" .:ioVM@"[bitmap[j*w+i]>>5]);
+    putchar('\n');
+  }
+  return 0;
+}
+#endif
+  

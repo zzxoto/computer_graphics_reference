@@ -232,7 +232,6 @@ internal void display(void)
   glUniformMatrix4fv(programData.worldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraMatrix));
   glUseProgram(0);
   
-  
   //draw floor
   {
     MatrixStack modelMatrix;
