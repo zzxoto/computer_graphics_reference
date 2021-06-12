@@ -213,16 +213,6 @@ class MatrixStack
     this->m_currMatrix = this->m_currMatrix * rotation;
   }
   
-  void RotateX(float degrees)
-  {
-    //TODO:
-  }
-  
-  void RotateY(float degrees)
-  {
-    //TODO:
-  }
-  
   private:
   std::stack<glm::mat4, std::vector<glm::mat4>> m_stack;
   glm::mat4 m_currMatrix;

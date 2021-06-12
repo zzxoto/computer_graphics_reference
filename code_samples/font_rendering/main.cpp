@@ -448,7 +448,6 @@ static void reshape(int w, int h)
   g_windowH = h;
   g_windowW = w;
   
-  
   MatrixStack mat;
   mat.Translate(-1.0f, 1.0f, 0.0f);
   mat.Scale(glm::vec3(2.0f / g_windowW, -2.0f / g_windowH, 1.0f));  
